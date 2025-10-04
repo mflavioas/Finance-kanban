@@ -39,13 +39,13 @@ Siga os passos abaixo para ter uma cópia do projeto rodando na sua máquina.
 1.  **Clone o repositório:**
 
     ```bash
-    git clone https://github.com/seu-usuario/meu-finan-kanban.git
+    git clone  https://github.com/mflavioas/Finance-Kanban.git
     ```
 
 2.  **Navegue até o diretório do projeto:**
 
     ```bash
-    cd meu-finan-kanban
+    cd Finance-Kanban
     ```
 
 3.  **Instale as dependências:**
@@ -71,10 +71,11 @@ Siga os passos abaixo para ter uma cópia do projeto rodando na sua máquina.
 
 > # 2\. Inicie um servidor para a build
 >
+> ```bash
 > npm run preview
->
 > ```
-> ```
+
+6. Acesse online agora para conhecer -> [Finance Kanban](https://finance-kanban.netlify.app/)
 
 ## 📁 Estrutura do Projeto
 
