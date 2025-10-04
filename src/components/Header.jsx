@@ -27,7 +27,6 @@ export const Header = ({
     return (
         <header className="app-header">
             <div className="header-top">
-                {/* <h1 className="logo">Meu Financeiro em Kanban</h1> */}
                 <div>
                     <img src={logoImage} alt="Meu Financeiro Kanban" className="logo" />
                     <h2>SeiQueDevo!</h2>

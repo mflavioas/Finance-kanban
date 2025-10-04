@@ -31,10 +31,6 @@
   }
 }
 
-.card {
-  padding: 2em;
-}
-
 .read-the-docs {
   color: #888;
 }
@@ -48,9 +44,10 @@
   flex-grow: 1;
   display: flex;
   gap: 16px;
-  padding: 24px;
-  overflow-x: auto;
-  align-items: flex-start; /* Alinha os boards no topo */
+  padding: 18px;
+  flex-wrap: wrap;
+  overflow-y: auto;
+  align-items: flex-start; 
 }
 
 .add-board-container {
@@ -61,7 +58,7 @@
 .add-board-btn {
   width: 100%;
   padding: 12px;
-  background-color: var(--bg-color); /*rgba(255, 255, 255, 0.5); */
+  background-color: var(--bg-color);
   border: none;
   border-radius: var(--border-radius);
   cursor: pointer;
@@ -71,7 +68,7 @@
 }
 
 .add-board-btn:hover {
-  background-color: var(--board-bg);/*rgba(255, 255, 255, 0.8);*/
+  background-color: var(--board-bg);
 }
 
 .form-group {
@@ -79,11 +76,9 @@
 }
 
 label {
-    /* display: block; */
     margin-bottom: 8px;
     font-weight: 500;
     text-align: left;
-    /* align-content: flex-end; */
 }
 
 input,
@@ -123,4 +118,23 @@ select {
     background-color: transparent;
     color: var(--color-despesa);
     margin-right: auto;
+}
+
+@media (max-width: 768px) {
+  .kanban-container {
+    flex-direction: column;
+    overflow-x: hidden;
+    overflow-y: visible;
+    align-items: center;
+    gap: 24px;
+    padding: 16px;
+    flex-grow: 0;
+  }
+
+  .app {
+  display: flex;
+  flex-direction: column;
+  height: auto;
+  width: 95vw;
+}
 }

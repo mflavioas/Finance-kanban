@@ -2,35 +2,59 @@
   position: relative;
   background-color: var(--card-bg);
   border-radius: var(--border-radius);
-  padding: 10px 10px;
+  padding: 0.5em;
   margin-bottom: 8px;
   box-shadow: var(--shadow);
-  cursor: grab;
-  border-left: 4px solid var(--text-secondary);
+  display: flex;
+  align-items: stretch;
 }
 
 .card:hover {
   background-color: var(--board-bg);
 }
 
-/* Quando o mouse estiver sobre o card, o container de ações se tornará visível */
 .card:hover .card-actions {
   opacity: 1;
+}
+
+.drag-handle {
+  cursor: grab;
+  color: var(--border-color);
+  display: flex;
+  align-items: center;
+  border-right: 1px solid var(--border-color);
+  align-self: stretch;
+}
+
+.drag-handle:hover {
+  color: var(--text-secondary);
 }
 
 .card-content {
   display: flex;
   justify-content: left;
-  /*space-between*/
-  /* align-items: left; */
-  /* gap: 20px; */
+  padding: 2px 6px;
+}
+
+.card-content-wrapper {
+  flex-grow: 1;
+  padding: 8px 12px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 4px;
+}
+
+.card-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
 .card-title {
   font-weight: 500;
   font-size: 14px;
-  /* Aumenta o espaço para não ficar embaixo dos DOIS botões */
-  /* padding-right: 55px;  */
+  text-align: left;
 }
 
 .card-amount {
@@ -40,7 +64,14 @@
   font-size: 12px;
   font-weight: bold;
   justify-content: right;
-  right: 6px;
+  padding: 2px 2px;
+}
+
+.card-date {
+  font-size: 12px;
+  color: var(--text-secondary);
+  width: 100%;
+  text-align: right;
 }
 
 .card-amount.receita {
@@ -51,19 +82,16 @@
   color: var(--color-despesa);
 }
 
-/* NOVO: Container para os botões de ação */
 .card-actions {
   position: absolute;
   top: 10%;
   right: 6px;
-  transform: translateY(-50%); /* Centraliza verticalmente */
+  transform: translateY(-50%);
   display: flex;
-  gap: 4px;
   opacity: 0;
   transition: opacity 0.2s ease-in-out;
 }
 
-/* Estilo genérico para ambos os botões */
 .card-action-btn {
   background: none;
   border: none;
@@ -78,6 +106,6 @@
 }
 
 .card-action-btn:hover {
-  background-color: /*#dcdfe4;*/ var(--card-bg);
+  background-color: var(--card-bg);
   color: var(--text-primary); 
 }

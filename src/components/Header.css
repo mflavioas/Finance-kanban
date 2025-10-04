@@ -27,7 +27,7 @@
 }
 .month-selector button {
   background: none;
-  border: none ;/*1px solid var(--border-color);*/
+  border: none ;
   border-radius: 50%;
   width: 32px;
   height: 32px;
@@ -50,7 +50,7 @@
 }
 
 .header-actions button:hover{
-  background-color: /*#dcdfe4;*/ var(--card-bg);
+  background-color: var(--card-bg);
   color: var(--text-primary); 
 }
 
@@ -69,4 +69,40 @@
 
 .summary-item strong {
   font-size: 20px;
+}
+
+@media (max-width: 768px) {
+  .app-header {
+    padding: 16px;
+    position: static;
+  }
+
+  .header-top {
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 6px;
+  }
+
+  .logo {
+    text-align: center;
+    order: -1;
+  }
+
+  .header-summary {
+    flex-direction: column;
+    gap: 12px;
+    margin-top: 6px;
+  }
+
+  .header-actions button {
+    padding: 18px 8px;
+    margin-top: 10%;
+  }
+}
+
+@media (max-width: 480px) {
+  .month-selector h2 {
+    font-size: 18px;
+    width: 150px;
+  }
 }

@@ -7,11 +7,13 @@ import { FaPencilAlt } from 'react-icons/fa';
 import { IoMdAddCircleOutline } from "react-icons/io";
 import './Board.css';
 
-export const Board = ({ board, cards, currencySymbol, onAddCard, onDeleteBoard, onEditCard, onEditBoard, onDeleteCard }) => {
+export const Board = ({ board, cards, currencySymbol, onAddCard, onDeleteBoard, onEditCard, onEditBoard, onDeleteCard, onContextMenu }) => {
   const { setNodeRef } = useDroppable({ id: board.id });
   const [isEditing, setIsEditing] = useState(false);
   const [newTitle, setNewTitle] = useState(board.title);
-  const boardTotal = cards.reduce((sum, card) => sum + card.amount, 0);
+  const receitas = cards.filter(c => c.type === 'receita').reduce((sum, c) => sum + (parseFloat(c.amount) || 0), 0);
+  const despesas =cards.filter(c => c.type === 'despesa').reduce((sum, c) => sum + (parseFloat(c.amount) || 0), 0);
+  const boardTotal = receitas - despesas;
 
   const handleTitleSave = () => {
     if (newTitle.trim() && newTitle !== board.title) {
@@ -68,6 +70,7 @@ export const Board = ({ board, cards, currencySymbol, onAddCard, onDeleteBoard, 
               currencySymbol={currencySymbol} 
               onEdit={onEditCard} 
               onDelete={onDeleteCard}
+              onContextMenu={onContextMenu}
             />
           )}
         </div>

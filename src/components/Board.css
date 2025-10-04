@@ -1,16 +1,13 @@
-/* src/components/Board.css */
 .board {
   display: flex;
   flex-direction: column;
   flex-shrink: 0;
   width: 280px;
-  max-height: 100%;
   background-color: var(--board-bg);
   border-radius: var(--border-radius);
-  padding: 8px;
+  padding: 3px;
 }
 
-/* Quando o mouse estiver sobre o board, as ações se tornarão visíveis */
 .board:hover .board-actions {
   opacity: 1;
 }
@@ -28,7 +25,8 @@
   font-size: 16px;
   font-weight: bold;
   margin: 0;
-  flex-grow: 1; /* Permite que o título ocupe o espaço disponível */
+  flex-grow: 1;
+  text-align: left;
 }
 
 .board-title-input {
@@ -52,14 +50,14 @@
   font-size: 14px;
   font-weight: 500;
   color: var(--text-secondary);
+  text-align: right;
 }
 
-/* NOVO: Estilos para o container de ações */
 .board-actions {
   display: flex;
   align-items: center;
   gap: 4px;
-  opacity: 0; /* Começa invisível */
+  opacity: 0;
   transition: opacity 0.2s ease-in-out;
 }
 
@@ -76,7 +74,7 @@
 }
 
 .action-btn:hover {
-    background-color: /*#dcdfe4;*/ var(--hounver);
+    background-color: var(--hounver);
     color: var(--card-bg);
 }
 
@@ -99,6 +97,13 @@
 }
 
 .add-card-btn:hover {
-    background-color: /*#dcdfe4;*/var(--card-bg);
-    color: var(--text-primary);/*#1d2125;*/
+    background-color: var(--card-bg);
+    color: var(--text-primary);
+}
+
+@media (max-width: 768px) {
+  .board {
+    width: 100%;
+    max-width: 450px; 
+  }
 }

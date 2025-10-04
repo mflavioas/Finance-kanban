@@ -17,6 +17,7 @@ import { Modal } from './components/Modal';
 //import { CardFormModal } from './components/CardFormModal';
 import { SettingsModal } from './components/SettingsModal';
 import { IoMdAddCircleOutline } from "react-icons/io";
+import { ContextMenu } from './components/ContextMenu';
 import './App.css';
 
 
@@ -100,7 +101,12 @@ function App() {
     const today = new Date();
     return today.getFullYear() + '-' + String(today.getMonth() + 1).padStart(2, '0');
   });
-
+  const [contextMenu, setContextMenu] = useState({
+    visible: false,
+    x: 0,
+    y: 0,
+    cardId: null,
+  });
   useEffect(() => {
     const currentTheme = data.settings?.theme || 'light';
     document.body.classList.remove('light', 'dark');
@@ -135,6 +141,37 @@ function App() {
       distance: 8
     }
   }));
+  
+  const handleOpenContextMenu = (event, cardId) => {
+    event.preventDefault();
+    setContextMenu({
+      visible: true,
+      x: event.clientX,
+      y: event.clientY,
+      cardId: cardId,
+    });
+  };
+
+  const handleCloseContextMenu = () => {
+    setContextMenu({ ...contextMenu, visible: false });
+  };
+
+  const handleMoveCardFromMenu = (cardId, targetBoardId) => {
+    setData(prev => {
+      const cardToMove = prev.cards[cardId];
+      if (cardToMove) {
+        return {
+          ...prev,
+          cards: {
+            ...prev.cards,
+            [cardId]: { ...cardToMove, boardId: targetBoardId }
+          }
+        };
+      }
+      return prev;
+    });
+    handleCloseContextMenu();
+  };
 
   const handleClearHistory = () => {
     const confirmation = window.confirm("Esta ação irá apagar todos os dados cadastrados. Deseja continuar ?");
@@ -313,6 +350,8 @@ function App() {
     setCurrentMonth(d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0'));
   };
 
+  const currentCardForMenu = data.cards[contextMenu.cardId];
+
   return (
     <div className="app">
       <input type="file" ref={importFileRef} style={{ display: 'none' }}
@@ -327,9 +366,18 @@ function App() {
             const board = data.boards[boardId]; if (!board) return null;
             const cardsInBoard = cardsForMonth.filter(card => card.boardId === boardId);
             return (
-            <Board key={board.id} board={board} cards={cardsInBoard} currencySymbol={currencySymbol}
-              onAddCard={openCardModal} onDeleteBoard={handleDeleteBoard} onEditCard={openEditCardModal}
-              onEditBoard={handleEditBoard} onDeleteCard={handleDeleteCard} />);
+            <Board 
+              key={board.id} 
+              board={board} 
+              cards={cardsInBoard} 
+              currencySymbol={currencySymbol}
+              onAddCard={openCardModal} 
+              onDeleteBoard={handleDeleteBoard} 
+              onEditCard={openEditCardModal}
+              onEditBoard={handleEditBoard} 
+              onDeleteCard={handleDeleteCard} 
+              onContextMenu={handleOpenContextMenu}
+            />);
             })}
             <DragOverlay>
               {activeCard ? <Card card={activeCard} currencySymbol={currencySymbol} onEdit={()=> {}} onDelete={() => {}}
@@ -346,7 +394,17 @@ function App() {
             onSave={handleSaveSettings}
             currentSettings={data.settings}
             onClearHistory={handleClearHistory}
-            />
+          />
+        <ContextMenu
+          visible={contextMenu.visible}
+          x={contextMenu.x}
+          y={contextMenu.y}
+          cardId={contextMenu.cardId}
+          boards={Object.values(data.boards)}
+          currentBoardId={currentCardForMenu?.boardId}
+          onClose={handleCloseContextMenu}
+          onMove={handleMoveCardFromMenu}
+      />
     </div>
   );
 }
