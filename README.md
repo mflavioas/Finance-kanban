@@ -71,10 +71,11 @@ Siga os passos abaixo para ter uma cópia do projeto rodando na sua máquina.
 
 > # 2\. Inicie um servidor para a build
 >
+> ```bash
 > npm run preview
->
 > ```
-> ```
+
+6. Acesse online agora para conhecer -> [Finance Kanban](https://finance-kanban.netlify.app/)
 
 ## 📁 Estrutura do Projeto
 
