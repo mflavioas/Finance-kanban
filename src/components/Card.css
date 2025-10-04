@@ -1,0 +1,83 @@
+.card {
+  position: relative;
+  background-color: var(--card-bg);
+  border-radius: var(--border-radius);
+  padding: 10px 10px;
+  margin-bottom: 8px;
+  box-shadow: var(--shadow);
+  cursor: grab;
+  border-left: 4px solid var(--text-secondary);
+}
+
+.card:hover {
+  background-color: var(--board-bg);
+}
+
+/* Quando o mouse estiver sobre o card, o container de ações se tornará visível */
+.card:hover .card-actions {
+  opacity: 1;
+}
+
+.card-content {
+  display: flex;
+  justify-content: left;
+  /*space-between*/
+  /* align-items: left; */
+  /* gap: 20px; */
+}
+
+.card-title {
+  font-weight: 500;
+  font-size: 14px;
+  /* Aumenta o espaço para não ficar embaixo dos DOIS botões */
+  /* padding-right: 55px;  */
+}
+
+.card-amount {
+  display: flex;
+  align-items: right;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: bold;
+  justify-content: right;
+  right: 6px;
+}
+
+.card-amount.receita {
+  color: var(--color-receita);
+}
+
+.card-amount.despesa {
+  color: var(--color-despesa);
+}
+
+/* NOVO: Container para os botões de ação */
+.card-actions {
+  position: absolute;
+  top: 10%;
+  right: 6px;
+  transform: translateY(-50%); /* Centraliza verticalmente */
+  display: flex;
+  gap: 4px;
+  opacity: 0;
+  transition: opacity 0.2s ease-in-out;
+}
+
+/* Estilo genérico para ambos os botões */
+.card-action-btn {
+  background: none;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  color: var(--text-secondary);
+  padding: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.2s ease-in-out, color 0.2s ease-in-out;
+}
+
+.card-action-btn:hover {
+  background-color: /*#dcdfe4;*/ var(--card-bg);
+  color: var(--text-primary); 
+}

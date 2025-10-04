@@ -1,0 +1,126 @@
+#root {
+  margin: 0 auto;
+  padding: 1rem;
+  text-align: center;
+}
+
+.logo {
+  height: 5em;
+  will-change: filter;
+  transition: filter 300ms;
+}
+.logo:hover {
+  filter: drop-shadow(0 0 2em #48aa58aa);
+}
+.logo.react:hover {
+  filter: drop-shadow(0 0 2em #48aa58aa);
+}
+
+@keyframes logo-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  a:nth-of-type(2) .logo {
+    animation: logo-spin infinite 20s linear;
+  }
+}
+
+.card {
+  padding: 2em;
+}
+
+.read-the-docs {
+  color: #888;
+}
+
+.app {
+  display: flex;
+  flex-direction: column;
+}
+
+.kanban-container {
+  flex-grow: 1;
+  display: flex;
+  gap: 16px;
+  padding: 24px;
+  overflow-x: auto;
+  align-items: flex-start; /* Alinha os boards no topo */
+}
+
+.add-board-container {
+  flex-shrink: 0;
+  width: 280px;
+}
+
+.add-board-btn {
+  width: 100%;
+  padding: 12px;
+  background-color: var(--bg-color); /*rgba(255, 255, 255, 0.5); */
+  border: none;
+  border-radius: var(--border-radius);
+  cursor: pointer;
+  text-align: left;
+  font-weight: bold;
+  color: var(--text-primary);
+}
+
+.add-board-btn:hover {
+  background-color: var(--board-bg);/*rgba(255, 255, 255, 0.8);*/
+}
+
+.form-group {
+    margin-bottom: 16px;
+}
+
+label {
+    /* display: block; */
+    margin-bottom: 8px;
+    font-weight: 500;
+    text-align: left;
+    /* align-content: flex-end; */
+}
+
+input,
+textarea,
+select {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius);
+}
+
+.form-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+    margin-top: 24px;
+}
+
+.btn {
+    padding: 10px 20px;
+    border: none;
+    border-radius: var(--border-radius);
+    cursor: pointer;
+    font-weight: bold;
+}
+
+.btn-primary {
+    background-color: #0079bf;
+    color: white;
+}
+
+.btn-secondary {
+    background-color: var(--board-bg);
+    color: var(--text-primary);
+}
+.btn-danger {
+    background-color: transparent;
+    color: var(--color-despesa);
+    margin-right: auto;
+}

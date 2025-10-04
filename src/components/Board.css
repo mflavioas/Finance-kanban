@@ -1,0 +1,104 @@
+/* src/components/Board.css */
+.board {
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+  width: 280px;
+  max-height: 100%;
+  background-color: var(--board-bg);
+  border-radius: var(--border-radius);
+  padding: 8px;
+}
+
+/* Quando o mouse estiver sobre o board, as ações se tornarão visíveis */
+.board:hover .board-actions {
+  opacity: 1;
+}
+
+.board-header {
+  padding: 10px 8px;
+  margin-bottom: 10px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+}
+
+.board-title {
+  font-size: 16px;
+  font-weight: bold;
+  margin: 0;
+  flex-grow: 1; /* Permite que o título ocupe o espaço disponível */
+}
+
+.board-title-input {
+  font-size: 16px;
+  font-weight: bold;
+  padding: 4px 6px;
+  border: 2px solid #0079bf;
+  border-radius: 3px;
+  width: 100%;
+  font-family: inherit;
+}
+
+.board-header-right {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-shrink: 0;
+}
+
+.board-total {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-secondary);
+}
+
+/* NOVO: Estilos para o container de ações */
+.board-actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  opacity: 0; /* Começa invisível */
+  transition: opacity 0.2s ease-in-out;
+}
+
+.action-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--text-primary);
+    padding: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 4px;
+}
+
+.action-btn:hover {
+    background-color: /*#dcdfe4;*/ var(--hounver);
+    color: var(--card-bg);
+}
+
+.card-list {
+  flex-grow: 1;
+  min-height: 100px;
+  padding: 0 4px;
+  overflow-y: auto;
+}
+
+.add-card-btn {
+    background: none;
+    border: none;
+    color: var(--text-primary);
+    cursor: pointer;
+    text-align: left;
+    padding: 10px 8px;
+    border-radius: var(--border-radius);
+    width: 100%;
+}
+
+.add-card-btn:hover {
+    background-color: /*#dcdfe4;*/var(--card-bg);
+    color: var(--text-primary);/*#1d2125;*/
+}

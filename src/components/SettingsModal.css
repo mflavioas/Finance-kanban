@@ -1,0 +1,44 @@
+/* src/components/SettingsModal.css */
+
+.theme-selector {
+  display: flex;
+  gap: 12px;
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius);
+  padding: 4px;
+}
+
+.theme-selector label {
+  flex: 1;
+  display: block;
+  position: relative;
+  cursor: pointer;
+}
+
+.theme-selector input[type="radio"] {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.theme-option {
+  display: block;
+  text-align: center;
+  padding: 8px 12px;
+  border-radius: var(--border-radius);
+  transition: background-color 0.2s ease-in-out;
+}
+
+/* Estilo para a opção não selecionada */
+.theme-selector input[type="radio"] + .theme-option {
+  background-color: transparent;
+  color: var(--text-secondary);
+}
+
+/* Estilo para a opção selecionada */
+.theme-selector input[type="radio"]:checked + .theme-option {
+  background-color: #0079bf;
+  color: white;
+  font-weight: bold;
+}
