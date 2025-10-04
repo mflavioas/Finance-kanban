@@ -39,13 +39,13 @@ Siga os passos abaixo para ter uma cópia do projeto rodando na sua máquina.
 1.  **Clone o repositório:**
 
     ```bash
-    git clone https://github.com/seu-usuario/meu-finan-kanban.git
+    git clone  https://github.com/mflavioas/Finance-Kanban.git
     ```
 
 2.  **Navegue até o diretório do projeto:**
 
     ```bash
-    cd meu-finan-kanban
+    cd Finance-Kanban
     ```
 
 3.  **Instale as dependências:**
