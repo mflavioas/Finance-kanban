@@ -1,7 +1,7 @@
 // src/components/Modal.jsx
 import React from 'react';
 import { IoMdClose } from 'react-icons/io';
-import './Modal.css';
+import './css/Modal.css';
 
 export const Modal = ({ isOpen, onClose, title, children }) => {
   if (!isOpen) return null;

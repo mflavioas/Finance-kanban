@@ -1,0 +1,14 @@
+/* src/components/ConfirmationModal.css */
+
+.confirmation-message {
+  font-size: 16px;
+  color: var(--text-secondary);
+  line-height: 1.5;
+  margin-bottom: 24px;
+}
+
+.confirmation-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+}

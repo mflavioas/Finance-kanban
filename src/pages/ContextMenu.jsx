@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import './ContextMenu.css';
+import './css/ContextMenu.css';
 
 export const ContextMenu = ({ visible, x, y, cardId, boards, currentBoardId, onClose, onMove }) => {
   useEffect(() => {

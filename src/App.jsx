@@ -1,98 +1,19 @@
+// src/App.jsx
 import React, { useState, useMemo, useRef, useEffect } from 'react';
-import { 
-  DndContext, 
-  DragOverlay, 
-  closestCorners,
-  PointerSensor,
-  useSensor,
-  useSensors,
-} from '@dnd-kit/core';
+import { DndContext, DragOverlay, closestCorners, PointerSensor, useSensor, useSensors } from '@dnd-kit/core';
 import { v4 as uuidv4 } from 'uuid';
 import { useLocalStorage } from './hooks/useLocalStorage';
 import { getInitialState } from './data/initialState';
 import { Header } from './components/Header';
-import { Board } from './components/Board';
-import { Card } from './components/Card';
-import { Modal } from './components/Modal';
-//import { CardFormModal } from './components/CardFormModal';
-import { SettingsModal } from './components/SettingsModal';
+import { Board } from './pages/Board';
+import { Card } from './pages/Card';
+import { CardFormModal } from './pages/CardFormModal';
+import { BoardFormModal } from './pages/BoardFormModal';
+import { SettingsModal } from './pages/SettingsModal';
 import { IoMdAddCircleOutline } from "react-icons/io";
-import { ContextMenu } from './components/ContextMenu';
+import { ContextMenu } from './pages/ContextMenu';
+import { ConfirmationModal } from './components/ConfirmationModal'; // 1. IMPORTE O NOVO COMPONENTE
 import './App.css';
-
-
-const BoardFormModal = ({ isOpen, onClose, onSave }) => {
-    const [title, setTitle] = useState('');
-    useEffect(() => { if (isOpen) { setTitle(''); } }, [isOpen]);
-    const handleSubmit = (e) => { e.preventDefault(); if (!title.trim()) return; onSave(title); };
-    return (
-        <Modal isOpen={isOpen} onClose={onClose} title="Nova Categoria">
-            <form onSubmit={handleSubmit}>
-                <div className="form-group">
-                  <label>Nome da Categoria</label>
-                  <input type="text" value={title} onChange={(e) => setTitle(e.target.value)} required autoFocus/>
-                </div>
-                <div className="form-actions">
-                  <button type="button" className="btn btn-secondary" onClick={onClose}>Cancelar</button>
-                  <button type="submit" className="btn btn-primary">Criar</button>
-                </div>
-            </form>
-        </Modal>
-    );
-};
-
-const CardFormModal = ({ isOpen, onClose, onSave, onDelete, card, currentMonth }) => {
-    const [formData, setFormData] = useState({ title: '', amount: '', type: 'despesa', date: '' });
-    useEffect(() => {
-      if (isOpen) {
-        if (card) {
-          setFormData({
-            ...card
-          });
-        } else {
-          setFormData({
-            title: '',
-            amount: '',
-            type: 'despesa',
-            date: currentMonth + '-' + new Date().getDate().toString().padStart(2, '0')
-          });
-        }
-      }
-    }, [card, isOpen, currentMonth]);
-    const handleChange = (e) => setFormData(prev => ({ ...prev, [e.target.name]: e.target.value }));
-    const handleSubmit = (e) => { e.preventDefault(); onSave(formData); };
-    return (
-        <Modal isOpen={isOpen} onClose={onClose} title={card ? 'Editar Lançamento' : 'Novo Lançamento' }>
-          <form onSubmit={handleSubmit}>
-            <div className="form-group">
-              <label>Nome</label>
-              <input type="text" name="title" value={formData.title} onChange={handleChange} required />
-            </div>
-            <div className="form-group">
-              <label>Valor</label>
-              <input type="number" step="0.01" name="amount" value={formData.amount} onChange={handleChange} required />
-            </div>
-            <div className="form-group">
-              <label>Tipo</label>
-              <select name="type" value={formData.type} onChange={handleChange}>
-                <option value="despesa">Despesa</option>
-                <option value="receita">Receita</option>
-              </select>
-            </div>
-            <div className="form-group">
-              <label>Data</label>
-              <input type="date" name="date" value={formData.date} onChange={handleChange} />
-            </div>
-            <div className="form-actions">{card && <button type="button" className="btn btn-danger" onClick={()=>
-                onDelete(card.id)}>Excluir</button>}
-              <button type="button" className="btn btn-secondary" onClick={onClose}>Cancelar</button>
-              <button type="submit" className="btn btn-primary">Salvar</button>
-            </div>
-          </form>
-        </Modal>
-    );
-};
-
 
 function App() {
   const [data, setData] = useLocalStorage('finanKanbanData', getInitialState());
@@ -101,17 +22,57 @@ function App() {
     const today = new Date();
     return today.getFullYear() + '-' + String(today.getMonth() + 1).padStart(2, '0');
   });
-  const [contextMenu, setContextMenu] = useState({
-    visible: false,
-    x: 0,
-    y: 0,
+  const [contextMenu, setContextMenu] = useState({ visible: false, x: 0, y: 0, cardId: null });
+  const [deleteConfirmation, setDeleteConfirmation] = useState({
+    isOpen: false,
     cardId: null,
+    recurringTemplateId: null,
   });
+
   useEffect(() => {
     const currentTheme = data.settings?.theme || 'light';
-    document.body.classList.remove('light', 'dark');
-    document.body.classList.add(currentTheme);
+    document.body.className = currentTheme;
   }, [data.settings?.theme]);
+
+  useEffect(() => {
+    const templates = Object.values(data.recurringTemplates || {});
+    const cards = Object.values(data.cards || {});
+    let newCardsGenerated = false;
+    const updatedCards = {
+      ...data.cards
+    };
+
+    templates.forEach(template => {
+      const canGenerate = !template.startDate || currentMonth >= template.startDate;
+      if (canGenerate) {
+        const instanceDate = `${currentMonth}-${String(template.dayOfMonth).padStart(2, '0')}`;
+        const instanceExists = cards.some(card => card.recurringTemplateId === template.id && card.date.startsWith(currentMonth));
+
+        const isException = (template.exceptions || []).includes(instanceDate);
+
+        if (!instanceExists && !isException) {
+          const newCardId = uuidv4();
+          updatedCards[newCardId] = {
+            id: newCardId,
+            boardId: template.boardId,
+            title: template.title,
+            amount: template.amount,
+            type: template.type,
+            date: instanceDate,
+            recurringTemplateId: template.id,
+          };
+          newCardsGenerated = true;
+        }
+      }
+    });
+
+    if (newCardsGenerated) {
+      setData(prev => ({
+        ...prev,
+        cards: updatedCards
+      }));
+    }
+  }, [currentMonth, data.recurringTemplates, data.cards, setData]);
 
   const [isCardModalOpen, setCardModalOpen] = useState(false);
   const [isBoardModalOpen, setBoardModalOpen] = useState(false);
@@ -123,60 +84,27 @@ function App() {
   const currencySymbol = data.settings?.currencySymbol || 'R$';
 
   const cardsForMonth = useMemo(() => {
-    return Object.values(data.cards).filter(card => card.date.startsWith(currentMonth));
+    // CORREÇÃO: Adicionada uma verificação de segurança para garantir que 'card.date' exista.
+    return Object.values(data.cards || {}).filter(card => card && card.date && card.date.startsWith(currentMonth));
   }, [data.cards, currentMonth]);
 
   const totals = useMemo(() => {
-    const monthlyCards = Object.values(data.cards).filter(card => card.date.startsWith(currentMonth));
-    const receitas = monthlyCards.filter(c => c.type === 'receita').reduce((sum, c) => sum + (parseFloat(c.amount) || 0), 0);
-    const despesas = monthlyCards.filter(c => c.type === 'despesa').reduce((sum, c) => sum + (parseFloat(c.amount) || 0), 0);
-    return {
-      receitas,
-      despesas
-    };
-  }, [data.cards, currentMonth]);
+    const receitas = cardsForMonth.filter(c => c.type === 'receita').reduce((sum, c) => sum + (parseFloat(c.amount) || 0), 0);
+    const despesas = cardsForMonth.filter(c => c.type === 'despesa').reduce((sum, c) => sum + (parseFloat(c.amount) || 0), 0);
+    return { receitas, despesas };
+  }, [cardsForMonth]); // A dependência aqui está correta
 
-  const sensors = useSensors(useSensor(PointerSensor, {
-    activationConstraint: {
-      distance: 8
-    }
-  }));
-  
-  const handleOpenContextMenu = (event, cardId) => {
-    event.preventDefault();
-    setContextMenu({
-      visible: true,
-      x: event.clientX,
-      y: event.clientY,
-      cardId: cardId,
-    });
-  };
+  const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 8 } }));
 
-  const handleCloseContextMenu = () => {
-    setContextMenu({ ...contextMenu, visible: false });
-  };
+  const handleCloseContextMenu = () => setContextMenu({ ...contextMenu, visible: false });
 
   const handleMoveCardFromMenu = (cardId, targetBoardId) => {
-    setData(prev => {
-      const cardToMove = prev.cards[cardId];
-      if (cardToMove) {
-        return {
-          ...prev,
-          cards: {
-            ...prev.cards,
-            [cardId]: { ...cardToMove, boardId: targetBoardId }
-          }
-        };
-      }
-      return prev;
-    });
+    setData(prev => ({ ...prev, cards: { ...prev.cards, [cardId]: { ...prev.cards[cardId], boardId: targetBoardId } } }));
     handleCloseContextMenu();
   };
 
   const handleClearHistory = () => {
-    const confirmation = window.confirm("Esta ação irá apagar todos os dados cadastrados. Deseja continuar ?");
-
-    if (confirmation) {
+    if (window.confirm("Esta ação irá apagar todos os dados cadastrados. Deseja continuar ?")) {
       setData(getInitialState());
       setSettingsModalOpen(false);
     }
@@ -184,226 +112,228 @@ function App() {
 
   const handleAddBoard = (title) => {
     const newBoardId = uuidv4();
-    setData(prev => ({
-      ...prev,
-      boards: {
-        ...prev.boards,
-        [newBoardId]: {
-          id: newBoardId,
-          title
-        }
-      },
-      boardOrder: [...prev.boardOrder, newBoardId]
-    }));
+    setData(prev => ({ ...prev, boards: { ...prev.boards, [newBoardId]: { id: newBoardId, title } }, boardOrder: [...prev.boardOrder, newBoardId] }));
     setBoardModalOpen(false);
   };
+  
+  // CORREÇÃO: Lógica de salvar o card foi refatorada e corrigida
+  const handleSaveCard = (formData) => {
+    const isEditing = !!editingCard;
 
-  const handleDeleteBoard = (boardId) => {
-    if (window.confirm('Tem certeza que deseja excluir essa categoria, todos os registros incluidos nela para este mês ou demais serão excluídos?')) {
+    if (formData.isRecurring) {
+      const templateId = isEditing ? editingCard.id : uuidv4();
+      const newTemplate = {
+        id: templateId,
+        boardId: isEditing ? editingCard.boardId : boardIdForNewCard,
+        title: formData.title,
+        amount: parseFloat(formData.amount) || 0,
+        type: formData.type,
+        dayOfMonth: parseInt(formData.dayOfMonth, 10),
+        exceptions: isEditing ? (editingCard.exceptions || []) : [],
+        startDate: isEditing ? editingCard.startDate : currentMonth,
+      };
+
       setData(prev => {
-        const newBoards = {
-          ...prev.boards
-        };
-        delete newBoards[boardId];
-        const newBoardOrder = prev.boardOrder.filter(id => id !== boardId);
+        // Se um card normal foi transformado em recorrente, remove o card antigo
         const newCards = {
           ...prev.cards
         };
-        Object.values(newCards).forEach(card => {
-          if (card.boardId === boardId) delete newCards[card.id];
-        });
+        if (isEditing && !editingCard.isRecurring) {
+          delete newCards[editingCard.id];
+        }
+        const currentInstance = Object.values(newCards).find(
+          c => c.recurringTemplateId === templateId && c.date.startsWith(currentMonth)
+        );
+
+        if (currentInstance) {
+          const instanceDate = `${currentMonth}-${String(newTemplate.dayOfMonth).padStart(2, '0')}`;
+          // Atualiza a instância com os novos dados do template
+          newCards[currentInstance.id] = {
+            ...currentInstance,
+            title: newTemplate.title,
+            amount: newTemplate.amount,
+            type: newTemplate.type,
+            date: instanceDate,
+          };
+        }
         return {
           ...prev,
-          boards: newBoards,
           cards: newCards,
-          boardOrder: newBoardOrder
+          recurringTemplates: {
+            ...prev.recurringTemplates,
+            [templateId]: newTemplate
+          },
+        };
+      });
+    } else { // É um lançamento normal
+      const cardId = isEditing ? editingCard.id : uuidv4();
+      const boardId = isEditing ? editingCard.boardId : boardIdForNewCard;
+      const newCardObject = {
+        id: cardId,
+        boardId,
+        title: formData.title,
+        amount: parseFloat(formData.amount) || 0,
+        type: formData.type,
+        date: formData.date,
+      };
+
+      setData(prev => {
+        // Se um item recorrente foi transformado em normal, remove o template antigo
+        const newTemplates = {
+          ...prev.recurringTemplates
+        };
+        if (isEditing && editingCard.isRecurring) {
+          delete newTemplates[editingCard.id];
+        }
+        return {
+          ...prev,
+          cards: {
+            ...prev.cards,
+            [cardId]: newCardObject
+          },
+          recurringTemplates: newTemplates,
         };
       });
     }
+    closeCardModal();
   };
-
-  const handleEditBoard = (boardId, newTitle) => {
-    setData(prev => ({
-      ...prev,
-      boards: {
-        ...prev.boards,
-        [boardId]: {
-          ...prev.boards[boardId],
-          title: newTitle
-        }
+  
+  // CORREÇÃO: Adicionada confirmação para deletar cards normais
+  const handleDeleteCard = (cardId, recurringTemplateId) => {
+    if (recurringTemplateId) {
+      setDeleteConfirmation({
+        isOpen: true,
+        cardId: cardId,
+        recurringTemplateId: recurringTemplateId,
+      });
+    } else { 
+      // Se for um item normal, a lógica de confirmação e exclusão continua a mesma.
+      if (window.confirm('Tem certeza que deseja excluir este lançamento?')) {
+        setData(prev => {
+          const newCards = { ...prev.cards };
+          delete newCards[cardId];
+          return { ...prev, cards: newCards };
+        });
       }
-    }));
+    }
+    // O closeCardModal() foi removido daqui para não fechar o modal de edição antes da confirmação.
   };
 
-  const handleSaveCard = (cardDataFromForm) => {
-    const isEditing = !!editingCard;
-    const cardId = isEditing ? editingCard.id : uuidv4();
-    const boardId = isEditing ? editingCard.boardId : boardIdForNewCard;
+  const handleConfirmDeleteCurrentOnly = () => {
+    const { cardId, recurringTemplateId } = deleteConfirmation;
+    const template = data.recurringTemplates[recurringTemplateId];
+    const card = data.cards[cardId];
 
-    setData(prev => {
-      const newCardObject = {
-        id: cardId,
-        boardId: boardId,
-        title: cardDataFromForm.title,
-        amount: parseFloat(cardDataFromForm.amount) || 0,
-        type: cardDataFromForm.type,
-        date: cardDataFromForm.date,
-      };
-
-      return {
-        ...prev,
-        cards: {
-          ...prev.cards,
-          [cardId]: newCardObject,
-        },
-      };
-    });
+    if (template && card) {
+      setData(prev => {
+        const updatedTemplate = { ...template, exceptions: [...(template.exceptions || []), card.date] };
+        const newCards = { ...prev.cards };
+        delete newCards[cardId];
+        return { 
+          ...prev, 
+          cards: newCards, 
+          recurringTemplates: { ...prev.recurringTemplates, [recurringTemplateId]: updatedTemplate }
+        };
+      });
+    }
+    // Fecha ambos os modais (confirmação e edição)
+    setDeleteConfirmation({ isOpen: false, cardId: null, recurringTemplateId: null });
     closeCardModal();
   };
 
-  const handleDeleteCard = (cardId) => {
-    setData(prev => {
-      const newCards = { ...prev.cards };
-      delete newCards[cardId];
-      return { ...prev, cards: newCards };
-    });
+  // Função para "Sim, excluir futuros" (neste caso, a regra toda)
+  const handleConfirmDeleteAll = () => {
+    const { recurringTemplateId } = deleteConfirmation;
+    const template = data.recurringTemplates[recurringTemplateId];
+
+    if (template) {
+      if (window.confirm(`Isso irá apagar a regra de recorrência "${template.title}" permanentemente. Deseja continuar?`)) {
+        setData(prev => {
+          const newTemplates = { ...prev.recurringTemplates };
+          delete newTemplates[recurringTemplateId];
+          const newCards = { ...prev.cards };
+          Object.values(newCards).forEach(c => { if (c.recurringTemplateId === recurringTemplateId && c.dayOfMonth >= template.dayOfMonth) delete newCards[c.id]; });
+          return { ...prev, cards: newCards, recurringTemplates: newTemplates };
+        });
+      }
+    }
+    // Fecha ambos os modais
+    setDeleteConfirmation({ isOpen: false, cardId: null, recurringTemplateId: null });
     closeCardModal();
   };
 
-  const handleSaveSettings = (newSettings) => {
-    setData(prev => ({ 
-      ...prev, 
-      settings: newSettings
-    }));
-    setSettingsModalOpen(false);
+  const handleCancelDelete = () => {
+    setDeleteConfirmation({ isOpen: false, cardId: null, recurringTemplateId: null });
   };
 
   const openCardModal = (boardId) => { setBoardIdForNewCard(boardId); setEditingCard(null); setCardModalOpen(true); };
-  const openEditCardModal = (card) => { setEditingCard(card); setCardModalOpen(true); };
+  const openEditCardModal = (card) => {
+    if (card.recurringTemplateId) {
+      const template = data.recurringTemplates[card.recurringTemplateId];
+      if (template) setEditingCard({ ...template, isRecurring: true });
+    } else {
+      setEditingCard(card);
+    }
+    setCardModalOpen(true);
+  };
   const closeCardModal = () => { setEditingCard(null); setCardModalOpen(false); };
   const handleDragStart = (event) => { setActiveCard(data.cards[event.active.id] || null); };
   const handleDragEnd = (event) => {
-    const {
-      active,
-      over
-    } = event;
+    const { active, over } = event;
     setActiveCard(null);
     if (!over || active.id === over.id) return;
     const activeCardData = data.cards[active.id];
     let overBoardId = null;
-    if (data.boards[over.id]) {
-      overBoardId = over.id;
-    } else if (data.cards[over.id]) {
-      overBoardId = data.cards[over.id].boardId;
-    }
+    if (data.boards[over.id]) overBoardId = over.id;
+    else if (data.cards[over.id]) overBoardId = data.cards[over.id].boardId;
     if (overBoardId && activeCardData.boardId !== overBoardId) {
-      setData(prev => ({
-        ...prev,
-        cards: {
-          ...prev.cards,
-          [active.id]: {
-            ...activeCardData,
-            boardId: overBoardId
-          }
-        }
-      }));
+      setData(prev => ({ ...prev, cards: { ...prev.cards, [active.id]: { ...activeCardData, boardId: overBoardId } } }));
     }
   };
+  const handleSaveSettings = (newSettings) => { setData(prev => ({ ...prev, settings: newSettings })); setSettingsModalOpen(false); };
+  const handleExport = () => { const jsonData = JSON.stringify(data, null, 2); const blob = new Blob([jsonData], { type: 'application/json' }); const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = 'meu-finan-kanban.json'; a.click(); URL.revokeObjectURL(url); };
+  const handleImportClick = () => { importFileRef.current.click(); };
+  const handleImportFile = (event) => { const file = event.target.files[0]; if (!file || !window.confirm("Substituir dados atuais?")) return; const reader = new FileReader(); reader.onload = (e) => { try { const d = JSON.parse(e.target.result); if (d.boards && d.cards && d.boardOrder) setData(d); else alert("Arquivo inválido."); } catch (error) { alert("Erro ao ler o arquivo."); } }; reader.readAsText(file); event.target.value = null; };
+  const changeMonth = (offset) => { const d = new Date(`${currentMonth}-02T00:00:00`); d.setMonth(d.getMonth() + offset); setCurrentMonth(d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0')); };
 
-  const handleExport = () => {
-    const jsonData = JSON.stringify(data, null, 2);
-    const blob = new Blob([jsonData], {
-      type: 'application/json'
-    });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'meu-finan-kanban.json';
-    a.click();
-    URL.revokeObjectURL(url);
-  };
-
-  const handleImportClick = () => {
-    importFileRef.current.click();
-  };
-
-  const handleImportFile = (event) => {
-    const file = event.target.files[0];
-    if (!file || !window.confirm("Isso substituirá todos os seus dados atuais. Deseja continuar?")) return;
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      try {
-        const d = JSON.parse(e.target.result);
-        if (d.boards && d.cards && d.boardOrder) setData(d);
-        else alert("Arquivo inválido.");
-      } catch (error) {
-        alert("Erro ao ler o arquivo.");
-      }
-    };
-    reader.readAsText(file);
-    event.target.value = null;
-  };
-  
-  const changeMonth = (offset) => {
-    const d = new Date(`${currentMonth}-02T00:00:00`);
-    d.setMonth(d.getMonth() + offset);
-    setCurrentMonth(d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0'));
-  };
-
-  const currentCardForMenu = data.cards[contextMenu.cardId];
+  const currentCardForMenu = data.cards ? data.cards[contextMenu.cardId] : null;
 
   return (
     <div className="app">
-      <input type="file" ref={importFileRef} style={{ display: 'none' }}
-        onChange={handleImportFile} accept=".json" />
-      <Header currentMonth={currentMonth} onPrevMonth={()=> changeMonth(-1)} onNextMonth={() => changeMonth(1)}
-        totals={totals} currencySymbol={currencySymbol} onExport={handleExport} onImport={handleImportClick}
-        onSettings={() => setSettingsModalOpen(true)} />
-        <main className="kanban-container">
-          <DndContext sensors={sensors} collisionDetection={closestCorners} onDragStart={handleDragStart}
-            onDragEnd={handleDragEnd}>
-            {data.boardOrder.map(boardId => {
+      <input type="file" ref={importFileRef} style={{ display: 'none' }} onChange={handleImportFile} accept=".json" />
+      <Header currentMonth={currentMonth} onPrevMonth={() => changeMonth(-1)} onNextMonth={() => changeMonth(1)} totals={totals} currencySymbol={currencySymbol} onExport={handleExport} onImport={handleImportClick} onSettings={() => setSettingsModalOpen(true)} />
+      <main className="kanban-container">
+        <DndContext sensors={sensors} collisionDetection={closestCorners} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
+          {(data.boardOrder || []).map(boardId => {
             const board = data.boards[boardId]; if (!board) return null;
             const cardsInBoard = cardsForMonth.filter(card => card.boardId === boardId);
             return (
-            <Board 
-              key={board.id} 
-              board={board} 
-              cards={cardsInBoard} 
-              currencySymbol={currencySymbol}
-              onAddCard={openCardModal} 
-              onDeleteBoard={handleDeleteBoard} 
-              onEditCard={openEditCardModal}
-              onEditBoard={handleEditBoard} 
-              onDeleteCard={handleDeleteCard} 
-              onContextMenu={handleOpenContextMenu}
-            />);
-            })}
-            <DragOverlay>
-              {activeCard ? <Card card={activeCard} currencySymbol={currencySymbol} onEdit={()=> {}} onDelete={() => {}}
-                /> : null}
-            </DragOverlay>
-          </DndContext>
-          <div className="add-board-container"><button onClick={()=> setBoardModalOpen(true)}
-              className="add-board-btn"><IoMdAddCircleOutline/> Adicionar Categoria</button></div>
-        </main>
-        <CardFormModal isOpen={isCardModalOpen} onClose={closeCardModal} onSave={handleSaveCard}
-          onDelete={handleDeleteCard} card={editingCard} currentMonth={currentMonth} />
-        <BoardFormModal isOpen={isBoardModalOpen} onClose={()=> setBoardModalOpen(false)} onSave={handleAddBoard} />
-          <SettingsModal isOpen={isSettingsModalOpen} onClose={()=> setSettingsModalOpen(false)}
-            onSave={handleSaveSettings}
-            currentSettings={data.settings}
-            onClearHistory={handleClearHistory}
-          />
-        <ContextMenu
-          visible={contextMenu.visible}
-          x={contextMenu.x}
-          y={contextMenu.y}
-          cardId={contextMenu.cardId}
-          boards={Object.values(data.boards)}
-          currentBoardId={currentCardForMenu?.boardId}
-          onClose={handleCloseContextMenu}
-          onMove={handleMoveCardFromMenu}
+              <Board
+                key={board.id} board={board} cards={cardsInBoard} currencySymbol={currencySymbol}
+                onAddCard={openCardModal} onEditCard={openEditCardModal} onDeleteCard={handleDeleteCard}
+                // CORREÇÃO: Props que estavam faltando foram adicionadas novamente
+                //onDeleteBoard={handleDeleteBoard} onEditBoard={handleEditBoard} onContextMenu={handleOpenContextMenu}
+              />);
+          })}
+          <DragOverlay>{activeCard ? <Card card={activeCard} currencySymbol={currencySymbol} onEdit={() => {}} onDelete={() => {}} /> : null}</DragOverlay>
+        </DndContext>
+        <div className="add-board-container">
+          <button onClick={() => setBoardModalOpen(true)} className="add-board-btn">
+            <IoMdAddCircleOutline /> Adicionar Categoria
+          </button>
+        </div>
+      </main>
+      <CardFormModal isOpen={isCardModalOpen} onClose={closeCardModal} onSave={handleSaveCard} onDelete={handleDeleteCard} card={editingCard} currentMonth={currentMonth} />
+      <BoardFormModal isOpen={isBoardModalOpen} onClose={() => setBoardModalOpen(false)} onSave={handleAddBoard} />
+      <SettingsModal isOpen={isSettingsModalOpen} onClose={() => setSettingsModalOpen(false)} onSave={handleSaveSettings} currentSettings={data.settings} onClearHistory={handleClearHistory} />
+      <ContextMenu visible={contextMenu.visible} x={contextMenu.x} y={contextMenu.y} cardId={contextMenu.cardId} boards={Object.values(data.boards || {})} currentBoardId={currentCardForMenu?.boardId} onClose={handleCloseContextMenu} onMove={handleMoveCardFromMenu} />
+      <ConfirmationModal
+        isOpen={deleteConfirmation.isOpen}
+        title="Excluir Lançamento Recorrente"
+        message="Deseja excluir apenas este lançamento ou a regra de recorrência inteira (este e todos os futuros)?"
+        onConfirmCurrent={handleConfirmDeleteCurrentOnly}
+        onConfirmAll={handleConfirmDeleteAll}
+        onCancel={handleCancelDelete}
       />
     </div>
   );

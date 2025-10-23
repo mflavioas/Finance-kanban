@@ -1,7 +1,6 @@
-// src/components/SettingsModal.jsx
 import React, { useState, useEffect } from 'react';
-import { Modal } from './Modal';
-import './SettingsModal.css'; 
+import { Modal } from '../components/Modal';
+import './css/SettingsModal.css'; 
 
 export const SettingsModal = ({ isOpen, onClose, onSave, currentSettings, onClearHistory }) => {
     
@@ -31,7 +30,7 @@ export const SettingsModal = ({ isOpen, onClose, onSave, currentSettings, onClea
     return (
         <Modal isOpen={isOpen} onClose={onClose} title="Configurações">
             <div className="form-group">
-                <label>Símbolo da Moeda</label>
+                <label htmlFor="currencySymbol">Símbolo da Moeda</label>
                 <input
                     type="text"
                     name="currencySymbol"

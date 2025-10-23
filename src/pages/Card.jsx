@@ -3,7 +3,7 @@ import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { FaArrowUp, FaArrowDown, FaPencilAlt, FaGripVertical } from 'react-icons/fa';
 import { MdDelete } from 'react-icons/md';
-import './Card.css';
+import './css/Card.css';
 
 export const Card = ({ card, currencySymbol, onEdit, onDelete, onContextMenu }) => {
   const {
@@ -30,9 +30,7 @@ export const Card = ({ card, currencySymbol, onEdit, onDelete, onContextMenu }) 
   
   const handleDeleteClick = (e) => {
     e.stopPropagation(); 
-    if (window.confirm('Tem certeza que deseja excluir este lançamento?')) {
-      onDelete(card.id);
-    }
+    onDelete(card.id, card.recurringTemplateId);
   };
 
   const formattedDate = new Date(`${card.date}T00:00:00`).toLocaleDateString('pt-BR');
@@ -52,7 +50,7 @@ export const Card = ({ card, currencySymbol, onEdit, onDelete, onContextMenu }) 
           <span className="card-title">{card.title}</span>
           <div className={`card-amount ${isReceita ? 'receita' : 'despesa'}`}>
             {isReceita ? <FaArrowUp /> : <FaArrowDown />}
-            <span>{currencySymbol} {card.amount.toLocaleString(undefined, {minimumFractionDigits: 2, maxmumFractionDigits: 2})}</span>
+            <span>{currencySymbol} {card.amount.toLocaleString('pt-BR', {minimumFractionDigits: 2, maxmumFractionDigits: 2})}</span>
           </div>
         </div>
         <div className="card-row">

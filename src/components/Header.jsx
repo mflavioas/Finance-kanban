@@ -1,11 +1,9 @@
 import React from 'react';
 import { IoMdSettings } from "react-icons/io";
-import { RiSettingsFill } from "react-icons/ri";
 import { ImUpload } from "react-icons/im";
 import { FaFileExport } from "react-icons/fa";
-import { MdNavigateBefore } from "react-icons/md";
-import { MdNavigateNext } from "react-icons/md";
-import './Header.css';
+import { MdNavigateBefore, MdNavigateNext } from "react-icons/md";
+import './css/Header.css';
 import logoImage from '/logo.png';
 
 export const Header = ({
